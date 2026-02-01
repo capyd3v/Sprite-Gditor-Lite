@@ -29,7 +29,7 @@ Esta es una versión gratuita y simplificada de la suite completa de herramienta
 
 ## 💎 Versión Completa
 ¿Buscas capas, herramientas de selección, animaciones y pinceles avanzados? 
-[Echa un vistazo a la versión completa en mi perfil de Itch.io]
+**Echa un vistazo a la versión completa en mi perfil de Itch.io:** https://capyd3v.itch.io/
 
 ## 📝 Licencia
 Este proyecto está bajo la licencia MIT. Siéntete libre de usarlo en tus proyectos comerciales o personales.
