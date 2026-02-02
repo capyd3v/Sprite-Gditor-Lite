@@ -21,12 +21,12 @@ const MAX_ZOOM = 5.0
 @onready var color_picker: ColorPickerButton = %ColorPickerButtons
 @onready var spin_size: SpinBox = %SpinSize
 @onready var spin_brush: SpinBox = %SpinBrush 
-var canvas_bg: ColorRect # Lo crearemos dinámicamente
+var canvas_bg: ColorRect
 
 var save_dialog: FileDialog
 
 func _ready():
-	_create_background_node() # Crear el fondo visual
+	_create_background_node()
 	_setup_dialogs()
 	
 	%BtnUndo.pressed.connect(_undo)
@@ -38,21 +38,15 @@ func _ready():
 	setup_canvas(int(spin_size.value))
 
 func _create_background_node():
-	# Creamos un ColorRect que servirá de fondo visual
 	canvas_bg = ColorRect.new()
-	canvas_bg.color = Color(0.15, 0.17, 0.2, 1.0) # Tu color original
-	canvas_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE # Para que no bloquee clicks
-	
-	# Lo añadimos detrás del canvas
+	canvas_bg.color = Color(0.15, 0.17, 0.2, 1.0)
+	canvas_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE 
 	canvas.add_sibling.call_deferred(canvas_bg)
-	# Reordenamos para que esté justo detrás
 	canvas_bg.show_behind_parent = true
 
 func setup_canvas(size: int):
 	image = Image.create(size, size, false, Image.FORMAT_RGBA8)
-	# La imagen ahora nace TRANSPARENTE
 	image.fill(Color(0, 0, 0, 0)) 
-	
 	undo_stack.clear()
 	redo_stack.clear()
 	undo_stack.push_back(image.get_data())
@@ -89,7 +83,6 @@ func _set_zoom(new_zoom: float):
 	var new_size = Vector2(base_size, base_size) * current_zoom
 	
 	canvas.custom_minimum_size = new_size
-	# El fondo sigue el tamaño del canvas para cubrirlo siempre
 	if canvas_bg:
 		canvas_bg.custom_minimum_size = new_size
 		canvas_bg.size = new_size
@@ -110,7 +103,6 @@ func draw_at_pos(gui_pos: Vector2):
 	var center_y = int((adj_pos.y * img_size.y) / actual_size.y)
 	
 	var draw_color = color_picker.color
-	# Borrador: Pinta transparencia pura
 	if current_button == MOUSE_BUTTON_RIGHT:
 		draw_color = Color(0, 0, 0, 0) 
 
