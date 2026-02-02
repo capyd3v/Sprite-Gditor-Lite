@@ -21,12 +21,13 @@ const MAX_ZOOM = 5.0
 @onready var color_picker: ColorPickerButton = %ColorPickerButtons
 @onready var spin_size: SpinBox = %SpinSize
 @onready var spin_brush: SpinBox = %SpinBrush 
+var canvas_bg: ColorRect # Lo crearemos dinámicamente
 
 var save_dialog: FileDialog
 
 func _ready():
+	_create_background_node() # Crear el fondo visual
 	_setup_dialogs()
-	
 	
 	%BtnUndo.pressed.connect(_undo)
 	%BtnRedo.pressed.connect(_redo)
@@ -36,9 +37,22 @@ func _ready():
 	canvas.gui_input.connect(_on_canvas_gui_input)
 	setup_canvas(int(spin_size.value))
 
+func _create_background_node():
+	# Creamos un ColorRect que servirá de fondo visual
+	canvas_bg = ColorRect.new()
+	canvas_bg.color = Color(0.15, 0.17, 0.2, 1.0) # Tu color original
+	canvas_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE # Para que no bloquee clicks
+	
+	# Lo añadimos detrás del canvas
+	canvas.add_sibling.call_deferred(canvas_bg)
+	# Reordenamos para que esté justo detrás
+	canvas_bg.show_behind_parent = true
+
 func setup_canvas(size: int):
 	image = Image.create(size, size, false, Image.FORMAT_RGBA8)
-	image.fill(Color(0.15, 0.17, 0.2, 1.0))
+	# La imagen ahora nace TRANSPARENTE
+	image.fill(Color(0, 0, 0, 0)) 
+	
 	undo_stack.clear()
 	redo_stack.clear()
 	undo_stack.push_back(image.get_data())
@@ -71,9 +85,14 @@ func _on_canvas_gui_input(event: InputEvent):
 
 func _set_zoom(new_zoom: float):
 	current_zoom = clamp(new_zoom, MIN_ZOOM, MAX_ZOOM)
-	
 	var base_size = 256.0
-	canvas.custom_minimum_size = Vector2(base_size, base_size) * current_zoom
+	var new_size = Vector2(base_size, base_size) * current_zoom
+	
+	canvas.custom_minimum_size = new_size
+	# El fondo sigue el tamaño del canvas para cubrirlo siempre
+	if canvas_bg:
+		canvas_bg.custom_minimum_size = new_size
+		canvas_bg.size = new_size
 	
 	canvas.update_minimum_size()
 
@@ -90,12 +109,11 @@ func draw_at_pos(gui_pos: Vector2):
 	var center_x = int((adj_pos.x * img_size.x) / actual_size.x)
 	var center_y = int((adj_pos.y * img_size.y) / actual_size.y)
 	
-	
 	var draw_color = color_picker.color
+	# Borrador: Pinta transparencia pura
 	if current_button == MOUSE_BUTTON_RIGHT:
-		draw_color = Color(0.15, 0.17, 0.2, 1.0) 
+		draw_color = Color(0, 0, 0, 0) 
 
-	
 	var brush_offset = int(spin_brush.value)
 	for dx in range(brush_offset):
 		for dy in range(brush_offset):
